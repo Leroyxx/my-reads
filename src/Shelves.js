@@ -4,60 +4,64 @@ import { Link } from 'react-router-dom'
 
 class Shelves extends React.Component {
   state = {
-    shelves: [
+    shelvesArray: [
       {
         title: 'Currently Reading',
         books: [
           {
-            title: 'To Kill A Mockingbird',
-            author: 'Harper Lee',
-            thumbnail: 'http://books.google.com/books/content?id=PGR2AwAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE73-GnPVEyb7MOCxDzOYF1PTQRuf6nCss9LMNOSWBpxBrz8Pm2_mFtWMMg_Y1dx92HT7cUoQBeSWjs3oEztBVhUeDFQX6-tWlWz1-feexS0mlJPjotcwFqAg6hBYDXuK_bkyHD-y&source=gbs_api'
-          },
-          {
-            title: "Ender's Game",
-            author: 'Orson Scott Card'
-          },
-        ]
-      },
-      {
-        title: 'Want to Read',
-        books: [
-          {
-            title: '1776',
-            author: 'David McCullough'
-          },
-          {
-            title: "Harry Potter and the Sorcerer's Stone",
-            author: 'J.K. Rowling'
+            title: 'Loading Books',
+            authors: '',
+            imageLinks: {
+            thumbnail: ''
           }
-        ]
-      },
-      {
-        title: 'Read',
-        books: [
-          {
-            title: 'The Hobbit',
-            author: 'J.R.R. Tolkien'
-          },
-          {
-            title: "Oh, the Places You'll Go!",
-            author: 'Seuss'
-          },
-          {
-            title: "The Adventures of Tom Sawyer",
-            author: "Mark Tawin"
-          }
-        ]
-      }
-    ]
-  }
+        }
+      ]
+    }
+  ]
+}
 
   componentDidMount() {
-    BooksAPI.getAll().then(response => this.setState(prevState => ( {...prevState, books: response} ), () => console.log(this.state)  ) )
+    BooksAPI.getAll()
+    .then(response => {
+      let shelvesUndone = response.reduce(
+        (object, book) => {
+          if (!object[book.shelf]) {
+            object[book.shelf] = [];
+          }
+          object[book.shelf].push(book)
+          return object
+        }, {} //initial value is an empty object
+      )
+
+      const camel2title = (camelCase) => camelCase
+      .replace(/([A-Z])/g, (match) => ` ${match}`)
+      .replace(/^./, (match) => match.toUpperCase());
+      //function by renevanderark on stackoverflow.com
+
+      let shelvesArray = [];
+      Object.keys(shelvesUndone).forEach(shelf => shelvesArray.push({title: camel2title(shelf), untitled: shelf}));
+      shelvesArray.forEach(shelf => shelf.books = shelvesUndone[shelf.untitled]);
+      shelvesArray.forEach(shelf => shelf.books.forEach(book => {
+        book.authors = book.authors.reduce((arr, author, index, array) => { if( index !== array.length-1) { return [...arr, author, ", "] }
+        else { return [...arr, author] }  }, []);
+        //add commas between authors
+        } ) )
+
+      this.setState(  { shelvesArray: shelvesArray },
+        () => {
+          console.log(this.state) }
+      )
+      } )
+  }
+
+  updateBooks(book, shelf) {
+    BooksAPI.update(book, shelf).then(
+      response => this.setState( {} )
+    )
   }
 
   render() {
-    return this.state.shelves.map(shelf => (<div className="list-books-content" key={shelf.title.toLowerCase().split(' ').join('-')}>
+    return this.state.shelvesArray.map(shelf => (<div className="list-books-content" key={shelf.title.toLowerCase().split(' ').join('-')}>
         <BookShelf title={shelf.title} books={shelf.books}/>
       </div>));
 }
@@ -79,7 +83,7 @@ class Book extends React.Component {
     return <li>
               <div className="book">
                 <div className="book-top">
-                  <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${this.props.book.thumbnail})` }}></div>
+                  <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${this.props.book.imageLinks.thumbnail })` }}></div>
                   <div className="book-shelf-changer">
                     <select>
                       <option value="none" disabled>Move to...</option>
@@ -91,7 +95,7 @@ class Book extends React.Component {
                   </div>
                 </div>
                 <div className="book-title">{this.props.book.title}</div>
-                <div className="book-authors">{this.props.book.author}</div>
+                <div className="book-authors">{this.props.book.authors}</div>
               </div>
             </li>
   }
