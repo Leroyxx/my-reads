@@ -94,7 +94,9 @@ class BooksApp extends React.Component {
     return (
       <BrowserRouter>
       <div className="app">
-        <Route exact path="/search" component={Search} />
+        <Route exact path="/search" render={() => {return <Search
+          moveBook={this.moveBook}
+        /> }} />
         <Route exact path="/" render={() => { return <Main
           sortResponse={this.sortResponse}
           moveBook={this.moveBook}
