@@ -3,95 +3,21 @@ import * as BooksAPI from './BooksAPI'
 import { Link } from 'react-router-dom'
 
 class Shelves extends React.Component {
-  state = {
-    shelvesArray: [
-        {
-          title: 'Currently Reading',
-          books: [
-            {
-              title: 'Loading Books',
-              authors: '',
-              authorsC: '', //Authors with commas between them
-              imageLinks: {
-              thumbnail: ''
-            }
-          }
-        ]
-      }
-    ]
+  constructor(props) {
+    super(props)
+    console.log(this.props);
   }
-
-  sortResponse(response) {
-    //Iterate over the books in the response
-    let shelvesUndone = response.reduce(
-      (object, book) => {
-        //If the shelf of the book is not listed as a key in the
-        //new object being created, create a shelf inside the object with the
-        //shelf name as a key and assign it a value of an empty books array
-        if (!object[book.shelf]) {
-          object[book.shelf] = [];
-        }
-        //then push the books into the array
-        object[book.shelf].push(book)
-        return object
-      }, {} //Initial value is an empty object
-    );
-
-    const camel2title = (camelCase) => camelCase
-    .replace(/([A-Z])/g, (match) => ` ${match}`)
-    .replace(/^./, (match) => match.toUpperCase());
-    //function by renevanderark on stackoverflow.com
-
-    let shelvesArray = [];
-    Object.keys(shelvesUndone).forEach(shelf => shelvesArray.push({title: camel2title(shelf), untitled: shelf}));
-    shelvesArray.forEach(shelf => shelf.books = shelvesUndone[shelf.untitled]);
-    shelvesArray.forEach(shelf => shelf.books.forEach(book => {
-      book.authorsC = book.authors.reduce((arr, author, index, array) => {
-        if( index !== array.length-1) { return [...arr, author, ", "] }
-        else { return [...arr, author] }  }, []);
-        //Add commas between authors and call this array differently (authorsC)
-      } ) )
-
-      return shelvesArray
-    }
 
   componentDidMount() {
     BooksAPI.getAll()
     .then(response => {
       console.log(response);
-      let shelvesArray = this.sortResponse(response);
-      this.setState(  { fullResponse: response, shelvesArray: shelvesArray },
-        //() => {
-         //console.log(this.state) }
-      )
+      this.props.sortResponse(response);
       } )
   }
 
-  moveBook(book, shelf) {
-    // console.log(book, shelf);
-    BooksAPI.update(book, shelf).then(response => {
-
-      let id2book = id => this.state.fullResponse.find(book => book.id === id);
-
-      let bookedResponse = Object.entries(response)
-      .reduce((books, [shelf, bookIDs]) => {
-        bookIDs.forEach(bookID => {
-          let book = id2book(bookID);
-          book.shelf = shelf;
-          books.push(book);
-        })
-        return books
-      }, []);
-
-      console.log(bookedResponse);
-      let shelvesArray = this.sortResponse(bookedResponse);
-      this.setState( {shelvesArray: shelvesArray} )
-    } )
-  }
-
-  render() {
-    return this.state.shelvesArray.map(shelf => (<div className="list-books-content" key={shelf.title.toLowerCase().split(' ').join('-')}>
-        <BookShelf shelf={shelf} moveBook={(book, v) => {this.moveBook(book, v)}} shelvesArray={this.state.shelvesArray}/>
+  render() { return this.props.shelvesArray.map(shelf => (<div className="list-books-content" key={shelf.title.toLowerCase().split(' ').join('-')}>
+        <BookShelf shelf={shelf} moveBook={(book, v) => {this.props.moveBook(book, v)}} shelvesArray={this.props.shelvesArray}/>
       </div>));
 }
 }
