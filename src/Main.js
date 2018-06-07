@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import Shelves from './Shelves'
+import { Shelves } from './Shelves'
 
 class Main extends React.Component {
   render() {

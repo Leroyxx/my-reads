@@ -63,8 +63,8 @@ class BooksApp extends React.Component {
         //Add commas between authors and call this array differently (authorsC)
       } ) )
       return this.setState( { fullResponse: response, shelvesArray: sArray },
-        //() => {
-         //console.log(this.state) }
+        () => {
+         console.log(this.state) }
       )
     }
 
@@ -72,30 +72,36 @@ class BooksApp extends React.Component {
   moveBook(book, shelf) {
     // console.log(book, shelf);
     BooksAPI.update(book, shelf).then(response => {
+      let errorID;
       let id2book = id => this.state.fullResponse.find(book => book.id === id);
-
       let bookedResponse = Object.entries(response)
       .reduce((books, [shelf, bookIDs]) => {
         bookIDs.forEach(bookID => {
           let book = id2book(bookID);
-          book.shelf = shelf;
-          books.push(book);
+          if (book) {book.shelf = shelf;
+          books.push(book)}
+          else {errorID = bookID}
         })
         return books
       }, []);
 
       // console.log({booked: bookedResponse});
-      return this.sortResponse(bookedResponse);
+      this.sortResponse(bookedResponse);
+      if (errorID) {
+        BooksAPI.get(errorID).then(book => { book.shelf = shelf; bookedResponse.push(book);
+        this.sortResponse(bookedResponse) })
+      }
     } )
   }
-
 
   render() {
     return (
       <BrowserRouter>
       <div className="app">
-        <Route exact path="/search" render={() => {return <Search
+        <Route exact path="/search" render={() => { return <Search
+                    sortResponse={this.sortResponse}
           moveBook={this.moveBook}
+          shelvesArray={this.state.shelvesArray}
         /> }} />
         <Route exact path="/" render={() => { return <Main
           sortResponse={this.sortResponse}
