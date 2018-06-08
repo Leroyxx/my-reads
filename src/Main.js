@@ -10,6 +10,7 @@ class Main extends React.Component {
       shelvesArray={this.props.shelvesArray}
       sortResponse={this.props.sortResponse}
       moveBook={this.props.moveBook}
+      booksArray={this.props.booksArray}
     />
       <div className="open-search">
         <Link to="/search">Add a book</Link>

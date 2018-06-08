@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
 import {DebounceInput} from 'react-debounce-input';
 import Book from './Book.js'
-import PropTypes from 'prop-types'
 
 class Search extends React.Component {
   state = {
@@ -17,7 +16,17 @@ class Search extends React.Component {
     this.setState( { query: query, isSearching: true });
     if (query.length>2) {
       BooksAPI.search(query)
-      .then(  response => this.setState(  { sentQuery: query, results: response, isSearching: false } )  )
+      .then(  response => {
+        if (response.isArray) {
+        response = response.map( book => {
+          if (book.authors) { //Turns out some books don't have em!
+                book.authorsC = book.authors.reduce((arr, author, index, array) => {
+                if( index !== array.length-1) { return [...arr, author, ", "] }
+                else { return [...arr, author] }  }, [])
+              }
+              return book
+            }) }
+        this.setState(  { sentQuery: query, results: response, isSearching: false } ) } )
     }
   }
 
@@ -56,8 +65,9 @@ class Search extends React.Component {
         userQuery={this.state.query}
         sentQuery={this.state.sentQuery}
         shelvesArray={this.props.shelvesArray}
-        moveBook={(book, v) => this.props.moveBook(book, v)}
+        moveBook={(book, v, cb) => this.props.moveBook(book, v, cb)}
         isSearching={this.state.isSearching}
+        booksArray={this.props.booksArray}
       />
     </div>
   }
@@ -72,9 +82,11 @@ const SearchResults = (props) => {
       if (results.length > 0 && sentQuery) {
         if (sentQuery.includes(userQuery)) return results.map(book => {
         return <Book book={book}
-        shelvesArray={props.shelvesArray}
-        moveBook={(book, e) => {props.moveBook(book, e.target.value)}}
-        key={book.title.toLowerCase().split(' ').join('-')}/>
+          searched={true}
+          booksArray={props.booksArray}
+          shelvesArray={props.shelvesArray}
+          moveBook={(book, e, cb) => {props.moveBook(book, e.target.value, cb)}}
+          key={book.id}/>
         })
         else if (userQuery.length <= 2) {return <p>Can you try being a bit more specific?</p>}
       }
