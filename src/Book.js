@@ -82,11 +82,12 @@ class BookShelfFetcher extends React.Component {
   render() {
     return <div className="book-shelf-fetcher">
     <select defaultValue="none" onChange={(e) => this.props.onChange(e)}>
-    <option value="none" disabled>Add to:</option>
+    <option disabled>Add to:</option>
     {this.props.shelvesArray.map(shelf => {
       return <option value={shelf.untitled}
               key={'ch-'+this.props.book.id+'-'+shelf.untitled}>{shelf.title}</option>
     }) }
+    <option value="none" disabled>None</option>
     </select>
   </div>
 
