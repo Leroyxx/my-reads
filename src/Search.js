@@ -17,7 +17,7 @@ class Search extends React.Component {
     if (query.length>2) {
       BooksAPI.search(query)
       .then(  response => {
-        if (response.isArray) {
+        if (Array.isArray(response)) {
         response = response.map( book => {
           if (book.authors) { //Turns out some books don't have em!
                 book.authorsC = book.authors.reduce((arr, author, index, array) => {
