@@ -25,7 +25,7 @@ class BookShelf extends React.Component {
       <h2 className="bookshelf-title">{this.props.shelf.title}</h2>
       <ol className="books-grid">
         {this.props.shelf.books.map(book => <Book book={book} booksArray={this.props.booksArray} shelvesArray={this.props.shelvesArray}
-          moveBook={(book, e) => {this.props.moveBook(book, e.target.value)}} key={book.title.toLowerCase().split(' ').join('-')}
+          moveBook={(book, e) => {this.props.moveBook(book, e.target.value)}} key={book.title.toLowerCase().split(' ').join('-') + '-' + book.id}
           page={this.props.page}/>)}
       </ol>
     </div>
