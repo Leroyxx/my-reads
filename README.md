@@ -1,5 +1,10 @@
 # MyReads Project
 
+## Description
+MyReads is a simple single-page web app built with React. Move books between shelves using the green menu icon (`▼`) for each of the books or add new ones with the search (`+`). In search, type a query to get books and add them with their matching `+` icon. You can also categorize added books while in search if they're already saved in one of the shelves.
+
+Your actions in the app are saved on an external server created by Udacity until you restart your browser. New books are fetched from an API supplied by Udacity.
+
 ## Install
 Type in git bash:
 ```bash
@@ -11,14 +16,7 @@ cd my-reads
 npm install
 npm start
 ```
-And the site will open up in your browser.
-
-## TL;DR inb4 I worked on this
-
-To get started developing right away:
-
-* install all project dependencies with `npm install`
-* start the development server with `npm start`
+And MyReads will open in your web browser.
 
 ## What I got from Udacity
 ```bash
